@@ -3,15 +3,49 @@
 import { SingleProductDetails } from "@/productdetails/SingleProductDetails";
 import useProducts, { ProductsType } from './products/useProducts';
 import { SingleProduct } from './products/SingleProductTile';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { auth } from "../lib/firebase-config";
+import { onAuthStateChanged, signOut } from 'firebase/auth'
 import Cart from "./productdetails/Cart";
+import { doc } from "firebase/firestore";
 
 export default function Products() {
   const { prods, productToShow, setProductToShow } = useProducts();
   const [cartContent, setCartContent] = useState<ProductsType[]>([])
   const [inCart, setInCart] = useState<boolean>(false)
   const currentUser = auth.currentUser
+
+
+  const onSignOut = async () => {
+    signOut(auth);
+    window.location.reload()
+  }
+
+  const handleCartOnClick = () => {
+    if (currentUser) {
+      setInCart(true)
+    }
+  }
+
+  auth.onAuthStateChanged((user) => {
+    const logoutBtn = document.getElementById("logoutBtn")
+    if (logoutBtn) {
+      if (user) {
+        logoutBtn.className = ""
+      } else {
+        logoutBtn.className = "hidden"
+      }
+    }
+  })
+
+  const logout = () => {
+    if (auth.currentUser) {
+      return (<button onClick={() => onSignOut()}>
+        {"Log out"}
+      </button>)
+    }
+  }
+
 
   const contents = () => {
     if (productToShow.id && !inCart) {
@@ -56,6 +90,7 @@ export default function Products() {
 
   return (
     <>
+
       <div className='p-[20px] flex bg-[#6100FF] text-white text-3xl justify-between rounded-bl-lg rounded-br-lg'>
         <button onClick={() => {
           setInCart(false)
@@ -63,7 +98,10 @@ export default function Products() {
         }}>
           Products
         </button>
-        <button onClick={() => { setInCart(true) }}>
+        <button id="logoutBtn" className="hidden" onClick={() => onSignOut()}>
+          Log out
+        </button>
+        <button onClick={handleCartOnClick}>
           <div className='flex justify-around'>
             <svg xmlns="http://www.w3.org/2000/svg" width="60" height="40" fill="currentColor" className="bi bi-cart" viewBox="0 0 16 16">
               <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" fill="white"></path>

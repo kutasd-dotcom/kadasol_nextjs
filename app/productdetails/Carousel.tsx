@@ -1,26 +1,13 @@
 // carousel.tsx
 "use client"
 import Image from 'next/image'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import useCarousel from './useCarousel'
 
 const Carousel = ({ images }: {
     images: string[]
 }) => {
-    const [currentImg, setCurrentImg] = useState(0)
-    const [carouselSize, setCarouselSize] = useState({ width: 0, height: 0 })
-    const carouselRef = useRef(null)
-
-
-    useEffect(() => {
-        let elem = carouselRef.current as unknown as HTMLDivElement
-        let { width, height } = elem.getBoundingClientRect()
-        if (carouselRef.current) {
-            setCarouselSize({
-                width,
-                height,
-            })
-        }
-    }, [])
+    const { currentImg, setCurrentImg, carouselRef, carouselSize } = useCarousel()
 
     return (
         <div className='flex flex-col gap-3'>
